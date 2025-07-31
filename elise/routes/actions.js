@@ -1,5 +1,5 @@
-const express = require('express');
-const imageService = require('../services/imageService');
+const express = require("express");
+const imageService = require("../services/imageService");
 
 const router = express.Router();
 
@@ -139,28 +139,27 @@ const router = express.Router();
  *                       type: string
  *                       example: "The base64 string provided is invalid or corrupted."
  */
-router.post('/actions', (req, res) => {
+router.post("/actions", (req, res) => {
   try {
     // Process the request using the service
     const result = imageService.processEffectRequest(req.body);
-    
+
     // Return the response with appropriate status code
     res.status(result.statusCode).json({
       metadata: req.body.metadata || {},
       data: result.data,
     });
-
   } catch (error) {
-    console.error('Error processing effect request:', error);
+    console.error("Error processing effect request:", error);
     res.status(500).json({
       metadata: req.body.metadata || {},
       data: {
         success: false,
-        code: 'INTERNAL_ERROR',
-        message: 'An internal server error occurred.',
+        code: "INTERNAL_ERROR",
+        message: "An internal server error occurred.",
       },
     });
   }
 });
 
-module.exports = router; 
+module.exports = router;

@@ -3,7 +3,7 @@
  * Gère la logique métier pour l'application de filtres
  */
 
-const Joi = require('joi');
+const Joi = require("joi");
 
 // Validation schemas
 const metadataSchema = Joi.object({
@@ -13,7 +13,7 @@ const metadataSchema = Joi.object({
 
 const filterDataSchema = Joi.object({
   Image: Joi.string().required(),
-  transformation: Joi.string().valid('filter').required(),
+  transformation: Joi.string().valid("filter").required(),
   type_id: Joi.string().required(),
   filter_name: Joi.string().required(),
 });
@@ -31,17 +31,17 @@ const requestSchema = Joi.object({
 const validateBase64 = (base64String) => {
   try {
     // Check if it's a valid base64 image format
-    if (!base64String.startsWith('data:image/')) {
+    if (!base64String.startsWith("data:image/")) {
       return false;
     }
-    
-    const base64Data = base64String.split(',')[1];
+
+    const base64Data = base64String.split(",")[1];
     if (!base64Data) {
       return false;
     }
-    
+
     // Validate base64 format
-    const buffer = Buffer.from(base64Data, 'base64');
+    const buffer = Buffer.from(base64Data, "base64");
     return buffer.length > 0;
   } catch (error) {
     return false;
@@ -56,8 +56,8 @@ const validateBase64 = (base64String) => {
  */
 const validateImageSize = (base64String, maxSizeMB = 5) => {
   try {
-    const base64Data = base64String.split(',')[1];
-    const buffer = Buffer.from(base64Data, 'base64');
+    const base64Data = base64String.split(",")[1];
+    const buffer = Buffer.from(base64Data, "base64");
     const sizeInMB = buffer.length / (1024 * 1024);
     return sizeInMB <= maxSizeMB;
   } catch (error) {
@@ -75,9 +75,9 @@ const applyFilter = (imageBase64, filterName) => {
   // TODO: Implémenter la logique réelle d'application de filtre
   // Pour l'instant, on retourne l'image originale
   // En production, on utiliserait une bibliothèque comme Sharp ou Jimp
-  
+
   console.log(`Applying filter: ${filterName} to image`);
-  
+
   // Simulation du traitement
   return imageBase64;
 };
@@ -106,7 +106,7 @@ const processFilterRequest = (requestBody) => {
         statusCode: 400,
         data: {
           success: false,
-          code: 'VALIDATION_ERROR',
+          code: "VALIDATION_ERROR",
           message: error.details[0].message,
         },
       };
@@ -121,8 +121,8 @@ const processFilterRequest = (requestBody) => {
         statusCode: 400,
         data: {
           success: false,
-          code: 'NO_IMAGE_UPLOADED',
-          message: 'No file uploaded.',
+          code: "NO_IMAGE_UPLOADED",
+          message: "No file uploaded.",
         },
       };
     }
@@ -134,8 +134,8 @@ const processFilterRequest = (requestBody) => {
         statusCode: 422,
         data: {
           success: false,
-          code: 'INVALID_BASE64',
-          message: 'The base64 string provided is invalid or corrupted.',
+          code: "INVALID_BASE64",
+          message: "The base64 string provided is invalid or corrupted.",
         },
       };
     }
@@ -147,8 +147,8 @@ const processFilterRequest = (requestBody) => {
         statusCode: 413,
         data: {
           success: false,
-          code: 'PAYLOAD_TOO_LARGE',
-          message: 'The file is too large. Maximum allowed size is 5MB.',
+          code: "PAYLOAD_TOO_LARGE",
+          message: "The file is too large. Maximum allowed size is 5MB.",
         },
       };
     }
@@ -165,16 +165,15 @@ const processFilterRequest = (requestBody) => {
         Image: processedImage,
       },
     };
-
   } catch (error) {
-    console.error('Error processing filter request:', error);
+    console.error("Error processing filter request:", error);
     return {
       success: false,
       statusCode: 500,
       data: {
         success: false,
-        code: 'INTERNAL_ERROR',
-        message: 'An internal server error occurred.',
+        code: "INTERNAL_ERROR",
+        message: "An internal server error occurred.",
       },
     };
   }
@@ -186,4 +185,4 @@ module.exports = {
   applyFilter,
   validateRequest,
   processFilterRequest,
-}; 
+};

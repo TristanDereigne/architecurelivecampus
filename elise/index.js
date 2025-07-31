@@ -1,48 +1,50 @@
-const express = require('express');
-const helmet = require('helmet');
-const Joi = require('joi');
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
+const express = require("express");
+const helmet = require("helmet");
+const Joi = require("joi");
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
 
 const app = express();
 const port = 3002;
 
 // Security middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+      },
     },
-  },
-}));
+  })
+);
 
 // Body parsing middleware
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use(express.json({ limit: "5mb" }));
+app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 
 // Swagger configuration
 const swaggerOptions = {
   definition: {
-    openapi: '3.0.0',
+    openapi: "3.0.0",
     info: {
-      title: 'Elise API - Service d\'Effets',
-      version: '1.0.0',
-      description: 'API pour le traitement d\'effets d\'images',
+      title: "Elise API - Service d'Effets",
+      version: "1.0.0",
+      description: "API pour le traitement d'effets d'images",
     },
     servers: [
       {
         url: `http://localhost:${port}`,
-        description: 'Serveur de développement',
+        description: "Serveur de développement",
       },
     ],
   },
-  apis: ['./index.js'],
+  apis: ["./index.js"],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Validation schemas
 const metadataSchema = Joi.object({
@@ -52,9 +54,9 @@ const metadataSchema = Joi.object({
 
 const effectDataSchema = Joi.object({
   Image: Joi.string().required(),
-  transformation: Joi.string().valid('effect').required(),
+  transformation: Joi.string().valid("effect").required(),
   type_id: Joi.string().required(),
-  direction: Joi.string().valid('horizontal', 'vertical').required(),
+  direction: Joi.string().valid("horizontal", "vertical").required(),
 });
 
 const requestSchema = Joi.object({
@@ -66,17 +68,17 @@ const requestSchema = Joi.object({
 const validateBase64 = (base64String) => {
   try {
     // Check if it's a valid base64 image format
-    if (!base64String.startsWith('data:image/')) {
+    if (!base64String.startsWith("data:image/")) {
       return false;
     }
-    
-    const base64Data = base64String.split(',')[1];
+
+    const base64Data = base64String.split(",")[1];
     if (!base64Data) {
       return false;
     }
-    
+
     // Validate base64 format
-    const buffer = Buffer.from(base64Data, 'base64');
+    const buffer = Buffer.from(base64Data, "base64");
     return buffer.length > 0;
   } catch (error) {
     return false;
@@ -85,8 +87,8 @@ const validateBase64 = (base64String) => {
 
 const validateImageSize = (base64String) => {
   try {
-    const base64Data = base64String.split(',')[1];
-    const buffer = Buffer.from(base64Data, 'base64');
+    const base64Data = base64String.split(",")[1];
+    const buffer = Buffer.from(base64Data, "base64");
     const sizeInMB = buffer.length / (1024 * 1024);
     return sizeInMB <= 5; // 5MB limit
   } catch (error) {
@@ -230,7 +232,7 @@ const validateImageSize = (base64String) => {
  *                       type: string
  *                       example: "The base64 string provided is invalid or corrupted."
  */
-app.post('/api/v1/actions', (req, res) => {
+app.post("/api/v1/actions", (req, res) => {
   try {
     // Validate request body
     const { error, value } = requestSchema.validate(req.body);
@@ -239,7 +241,7 @@ app.post('/api/v1/actions', (req, res) => {
         metadata: req.body.metadata || {},
         data: {
           success: false,
-          code: 'VALIDATION_ERROR',
+          code: "VALIDATION_ERROR",
           message: error.details[0].message,
         },
       });
@@ -253,8 +255,8 @@ app.post('/api/v1/actions', (req, res) => {
         metadata,
         data: {
           success: false,
-          code: 'NO_IMAGE_UPLOADED',
-          message: 'No file uploaded.',
+          code: "NO_IMAGE_UPLOADED",
+          message: "No file uploaded.",
         },
       });
     }
@@ -265,8 +267,8 @@ app.post('/api/v1/actions', (req, res) => {
         metadata,
         data: {
           success: false,
-          code: 'INVALID_BASE64',
-          message: 'The base64 string provided is invalid or corrupted.',
+          code: "INVALID_BASE64",
+          message: "The base64 string provided is invalid or corrupted.",
         },
       });
     }
@@ -277,8 +279,8 @@ app.post('/api/v1/actions', (req, res) => {
         metadata,
         data: {
           success: false,
-          code: 'PAYLOAD_TOO_LARGE',
-          message: 'The file is too large. Maximum allowed size is 5MB.',
+          code: "PAYLOAD_TOO_LARGE",
+          message: "The file is too large. Maximum allowed size is 5MB.",
         },
       });
     }
@@ -295,33 +297,34 @@ app.post('/api/v1/actions', (req, res) => {
         Image: processedImage,
       },
     });
-
   } catch (error) {
-    console.error('Error processing effect request:', error);
+    console.error("Error processing effect request:", error);
     res.status(500).json({
       metadata: req.body.metadata || {},
       data: {
         success: false,
-        code: 'INTERNAL_ERROR',
-        message: 'An internal server error occurred.',
+        code: "INTERNAL_ERROR",
+        message: "An internal server error occurred.",
       },
     });
   }
 });
 
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
   res.json({
-    service: 'Elise',
-    description: 'Service de traitement d\'effets d\'images',
-    version: '1.0.0',
+    service: "Elise",
+    description: "Service de traitement d'effets d'images",
+    version: "1.0.0",
     endpoints: {
-      docs: '/api-docs',
-      actions: 'POST /api/v1/actions',
+      docs: "/api-docs",
+      actions: "POST /api/v1/actions",
     },
   });
 });
 
 app.listen(port, () => {
   console.log(`🚀 Serveur Elise démarré sur le port ${port}`);
-  console.log(`📚 Documentation disponible sur http://localhost:${port}/api-docs`);
+  console.log(
+    `📚 Documentation disponible sur http://localhost:${port}/api-docs`
+  );
 });
