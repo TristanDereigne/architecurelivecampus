@@ -160,6 +160,7 @@ const processFilterRequest = (requestBody) => {
     return {
       success: true,
       statusCode: 200,
+      metadata,
       data: {
         success: true,
         Image: processedImage,

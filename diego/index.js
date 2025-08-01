@@ -1,40 +1,47 @@
 const express = require("express");
-const helmet = require("helmet");
+// const helmet = require("helmet");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const csrf = require("csurf");
 const cookieParser = require("cookie-parser");
+const dotenv = require("dotenv");
+const bodyParser = require("body-parser");
+
+dotenv.config();
+
+console.log(process.env.TOKEN);
 
 const app = express();
 const port = 3001;
 
 // Security middleware
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-      },
-    },
-  })
-);
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       directives: {
+//         defaultSrc: ["'self'"],
+//         styleSrc: ["'self'", "'unsafe-inline'"],
+//         scriptSrc: ["'self'"],
+//       },
+//     },
+//   })
+// );
+
+app.use(bodyParser.json());
 
 // Body parsing middleware
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 
 // Cookie parser for CSRF protection
-app.use(cookieParser());
+// app.use(cookieParser());
 
 // CSRF protection (exclude Swagger docs)
-app.use((req, res, next) => {
-  if (req.path.startsWith("/api-docs")) {
-    return next();
-  }
-  csrf({ cookie: true })(req, res, next);
-});
+// app.use((req, res, next) => {
+//   if (req.path.startsWith("/api-docs")) {
+//     return next();
+//   }
+//   csrf({ cookie: true })(req, res, next);
+// });
 
 // Import routes
 const actionsRoutes = require("./routes/actions");

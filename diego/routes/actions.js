@@ -142,12 +142,40 @@ router.post("/actions", (req, res) => {
   try {
     // Process the request using the service
     const result = imageService.processFilterRequest(req.body);
+    console.log("result : ", result);
+
+    const { metadata, data } = result;
+    const { Image } = data;
 
     // Return the response with appropriate status code
     res.status(result.statusCode).json({
       metadata: req.body.metadata || {},
       data: result.data,
     });
+
+    setTimeout(() => {
+      fetch("http://localhost:3000/api/v1/actions/diego", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          metadata,
+          data: {
+            success: true,
+            image: Image,
+          },
+        }),
+      })
+        // .then((response) => response.json())
+        .then((data) => {
+          // console.log("data : ", data);
+          console.log("DONNES RECU DE bill : ");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }, 1000);
   } catch (error) {
     console.error("Error processing filter request:", error);
     res.status(500).json({

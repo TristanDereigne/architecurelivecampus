@@ -1,24 +1,31 @@
 const express = require("express");
-const helmet = require("helmet");
+// const helmet = require("helmet");
 const Joi = require("joi");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
+const bodyParser = require("body-parser");
+
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const app = express();
 const port = 3002;
 
 // Security middleware
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-      },
-    },
-  })
-);
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       directives: {
+//         defaultSrc: ["'self'"],
+//         styleSrc: ["'self'", "'unsafe-inline'"],
+//         scriptSrc: ["'self'"],
+//       },
+//     },
+//   })
+// );
+
+app.use(bodyParser.json());
 
 // Body parsing middleware
 app.use(express.json({ limit: "5mb" }));
@@ -233,6 +240,8 @@ const validateImageSize = (base64String) => {
  *                       example: "The base64 string provided is invalid or corrupted."
  */
 app.post("/api/v1/actions", (req, res) => {
+  console.log("APPEL API ELISE POST : /api/v1/actions");
+  // console.log("REQUEST : ", req.body);
   try {
     // Validate request body
     const { error, value } = requestSchema.validate(req.body);
@@ -294,9 +303,38 @@ app.post("/api/v1/actions", (req, res) => {
       metadata,
       data: {
         success: true,
-        Image: processedImage,
+        // Image: processedImage,
       },
     });
+
+    console.log("metadata : ", metadata);
+
+    console.log("JUSTE AVANT LE SETTIMEOUT");
+
+    // FAUX TRAITEMENT IMAGE
+    setTimeout(() => {
+      fetch("http://localhost:3000/api/v1/actions/elise", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          metadata,
+          data: {
+            success: true,
+            image: processedImage,
+          },
+        }),
+      })
+        // .then((response) => response.json())
+        .then((data) => {
+          // console.log("data : ", data);
+          console.log("DONNES RECU DE bill : ");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }, 1000);
   } catch (error) {
     console.error("Error processing effect request:", error);
     res.status(500).json({

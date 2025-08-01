@@ -13,12 +13,18 @@ Ce projet implémente une architecture microservices pour le traitement d'images
 ## 🚀 Installation et Démarrage
 
 ### Prérequis
+
 - Node.js (version 16 ou supérieure)
 - npm ou yarn
+- créer un .env dans les dossiers (elise et diego) et mettre la clé TOKEN
 
 ### Installation des dépendances
 
 ```bash
+# Service Bill
+cd bill
+npm install
+
 # Service Diego (Filtres)
 cd diego
 npm install
@@ -31,7 +37,11 @@ npm install
 ### Démarrage des services
 
 ```bash
-# Service Diego
+# Service Bill
+cd bill
+npm run dev
+
+# Service Diego (dans un autre terminal)
 cd diego
 npm run dev
 
@@ -40,141 +50,34 @@ cd elise
 npm run dev
 ```
 
-## 📚 API Documentation
-
-### Service Diego - Filtres d'Images
-
-**Endpoint :** `POST http://localhost:3001/api/v1/actions`
-
-**Documentation Swagger :** http://localhost:3001/api-docs
-
-**Exemple de requête :**
-```json
-{
-  "metadata": {
-    "party_id": "154247",
-    "task_id": "45659"
-  },
-  "data": {
-    "Image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA...",
-    "transformation": "filter",
-    "type_id": "3",
-    "filter_name": "Sepia"
-  }
-}
-```
-
-**Réponse de succès (200) :**
-```json
-{
-  "metadata": {
-    "party_id": "154247",
-    "task_id": "45659"
-  },
-  "data": {
-    "success": true,
-    "Image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA..."
-  }
-}
-```
-
-### Service Elise - Effets d'Images
-
-**Endpoint :** `POST http://localhost:3002/api/v1/actions`
-
-**Documentation Swagger :** http://localhost:3002/api-docs
-
-**Exemple de requête :**
-```json
-{
-  "metadata": {
-    "party_id": "154247",
-    "task_id": "45659"
-  },
-  "data": {
-    "Image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA...",
-    "transformation": "effect",
-    "type_id": "3",
-    "direction": "horizontal"
-  }
-}
-```
-
-**Réponse de succès (200) :**
-```json
-{
-  "metadata": {
-    "party_id": "154247",
-    "task_id": "45659"
-  },
-  "data": {
-    "success": true,
-    "Image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA..."
-  }
-}
-```
-
 ## 🔒 Sécurité
 
 ### Mesures de sécurité implémentées
 
-1. **Helmet.js** : Headers de sécurité HTTP
-2. **CSRF Protection** : Protection contre les attaques CSRF
-3. **Validation des entrées** : Validation stricte avec Joi
-4. **Limitation de taille** : Limite de 5MB par image
-5. **Validation Base64** : Vérification du format des images
+1. **Validation des entrées** : Validation stricte avec Joi
+2. **Limitation de taille** : Limite de 5MB par image
+3. **Validation Base64** : Vérification du format des images
 
 ### Codes d'erreur
 
-| Code | Description | Message |
-|------|-------------|---------|
-| 400 | Validation échouée | Erreur de validation des données |
-| 400 | Aucune image | No file uploaded |
-| 413 | Fichier trop volumineux | The file is too large. Maximum allowed size is 5MB |
-| 422 | Base64 invalide | The base64 string provided is invalid or corrupted |
-| 500 | Erreur interne | An internal server error occurred |
-
-## 🧪 Tests
-
-### Exécution des tests
-
-```bash
-# Service Diego
-cd diego
-npm test
-
-# Service Elise
-cd elise
-npm test
-```
-
-### Couverture de code
-
-```bash
-# Service Diego
-cd diego
-npm run test:coverage
-
-# Service Elise
-cd elise
-npm run test:coverage
-```
-
-Les tests couvrent :
-- ✅ Validation des requêtes
-- ✅ Gestion des erreurs
-- ✅ Validation des images Base64
-- ✅ Limitation de taille des fichiers
-- ✅ Réponses de succès
+| Code | Description             | Message                                            |
+| ---- | ----------------------- | -------------------------------------------------- |
+| 400  | Validation échouée      | Erreur de validation des données                   |
+| 400  | Aucune image            | No file uploaded                                   |
+| 413  | Fichier trop volumineux | The file is too large. Maximum allowed size is 5MB |
+| 422  | Base64 invalide         | The base64 string provided is invalid or corrupted |
+| 500  | Erreur interne          | An internal server error occurred                  |
 
 ## 📋 Validation des Données
 
 ### Service Diego (Filtres)
+
 - `transformation` doit être `"filter"`
 - `filter_name` est requis
 - `Image` doit être un string Base64 valide
 
 ### Service Elise (Effets)
+
 - `transformation` doit être `"effect"`
 - `direction` doit être `"horizontal"` ou `"vertical"`
 - `Image` doit être un string Base64 valide
@@ -184,42 +87,101 @@ Les tests couvrent :
 ### Variables d'environnement
 
 Les services utilisent les ports suivants par défaut :
+
 - Diego : 3001
 - Elise : 3002
 
 ### Limites de sécurité
+
 - Taille maximale des images : 5MB
 - Format d'image supporté : Base64 avec préfixe `data:image/`
 
-## 📝 Notes de Développement
+### CODE de test
 
-### Architecture TDD
-Le développement suit les principes TDD (Test-Driven Development) :
-1. **RED** : Écrire un test qui échoue
-2. **GREEN** : Implémenter le code pour faire passer le test
-3. **REFACTOR** : Améliorer le code
+# Test de l'API `/api/v1/actions`
 
-### Couverture de code
-- Objectif : 80% de couverture minimum
-- Tous les tests doivent passer avant le merge
+## ✅ POST /api/v1/actions
 
-### Sécurité
-- Scan Semgrep automatique pour détecter les vulnérabilités
-- Validation stricte de toutes les entrées
-- Protection CSRF sur tous les endpoints
+- **URL** : `http://localhost:3000/api/v1/actions`
+- **Méthode** : `POST`
+- **Headers** :
+  - `Content-Type: application/json`
+- **Body JSON** :
 
-## 🚨 Points d'Attention
+```json
+{
+  "metadata": {
+    "party_id": "154247"
+  },
+  "data": {
+    "image": "data:image/png;base64",
+    "transformation": "filter",
+    "type_id": "3",
+    "direction": "horizontal"
+  }
+}
+```
 
-1. **Clés API** : Ne jamais commiter de clés API ou secrets dans le code
-2. **Validation** : Toujours valider les entrées utilisateur
-3. **Gestion d'erreurs** : Implémenter une gestion d'erreurs robuste
-4. **Tests** : Maintenir une couverture de code élevée
-5. **Documentation** : Tenir la documentation Swagger à jour
+- **Exemple de réponse** :
 
-## 📞 Support
+```json
+{
+  "metadata": {
+    "party_id": "154247"
+  },
+  "data": {
+    "success": true,
+    "status": "inProgress",
+    "task_id": "eb4f904b-273c-479d-a494-6b843cea09e2"
+  }
+}
+```
 
-Pour toute question ou problème :
-1. Vérifier la documentation Swagger
-2. Consulter les logs du service
-3. Exécuter les tests pour identifier les problèmes
-4. Vérifier la configuration de sécurité 
+---
+
+## 🔁 GET /api/v1/actions
+
+- **URL** : `http://localhost:3000/api/v1/actions`
+- **Méthode** : `GET`
+- **Headers** :
+  - `Content-Type: application/json`
+- **Body JSON** (si utilisé avec outils comme Postman, REST Client, etc.) :
+
+```json
+{
+  "metadata": {
+    "party_id": "154247",
+    "task_id": "eb4f904b-273c-479d-a494-6b843cea09e2"
+  },
+  "data": {
+    "image": "data:image/png;base64",
+    "transformation": "effect",
+    "type_id": "3",
+    "direction": "horizontal"
+  }
+}
+```
+
+- **Exemple de réponse** :
+
+```json
+{
+  "metadata": {
+    "party_id": "154247",
+    "task_id": "eb4f904b-273c-479d-a494-6b843cea09e2"
+  },
+  "data": {
+    "success": true,
+    "status": "done",
+    "image": "data:image/png;base64,iVIiIiion/HyzNjTsXZjBXAAAAAElFTkSuQmCC"
+  }
+}
+```
+
+---
+
+## 💡 Notes
+
+- Le champ `image` doit contenir une vraie image encodée en Base64.
+- Le champ `task_id` est fourni dans la réponse du POST.
+- Le `GET` utilise ce `task_id` pour vérifier le statut ou récupérer l’image transformée.

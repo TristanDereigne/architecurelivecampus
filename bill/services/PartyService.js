@@ -10,10 +10,4 @@ export class PartyService {
       status,
     };
   };
-
-  static retrieveImage = (task_id) => {
-    console.log("Récupération chez Diego ou Elise de l'image");
-    const modifiedImage = "modifiedImageInBase64"; // retour de call elise ou diego
-    return modifiedImage;
-  };
 }
